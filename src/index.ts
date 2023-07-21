@@ -1,14 +1,13 @@
-import express, { Express, Request, Response } from "express";
-import { configDotenv } from "dotenv";
+import express, { Express } from "express";
+import StartConfigs from "@/loaders/startConfigs";
 
-configDotenv();
+function StartServer() {
+  const app: Express = express();
 
-const app: Express = express();
+  StartConfigs(app);
 
-app.listen(4444, () => {
-});
+  app.listen(4444);
+}
 
-app.get("/", (req: Request, res: Response) => {
-  res.send("hello world");
-})
+StartServer();
 
