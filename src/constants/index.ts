@@ -1,1 +1,3 @@
-export const PORT = process.env.PORT;
+export enum HttpMessages {
+  NOT_FOUND = "ничего не найдено"
+}
