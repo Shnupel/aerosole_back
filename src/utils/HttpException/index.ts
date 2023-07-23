@@ -1,6 +1,6 @@
-import { HttpStatus } from "@/utils/HttpException/HttpStatus";
+import { HttpStatus } from "./HttpStatus";
 
-export class HttpException extends Error {
+export default class HttpException extends Error {
   private readonly code: HttpStatus;
   constructor(
     message: string,
@@ -19,3 +19,5 @@ export class HttpException extends Error {
     return this.message;
   }
 }
+
+export { HttpStatus } from "./HttpStatus";

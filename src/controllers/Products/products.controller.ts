@@ -1,20 +1,22 @@
-import { Router, NextFunction, Request, Response } from "express";
+import { NextFunction, Request, Response, Router } from "express";
 import { HttpMessages } from "@/constants";
-import ProductService from "./product.service";
+import HttpException, { HttpStatus } from "@/utils/HttpException";
+import ProductModel from "@/dbModels/Product";
 import { AddProductDto } from "@/controllers/Products/dto/addProduct.dto";
-import { TypedRequestBody } from "@/interfaces";
-import { HttpException } from "@/utils/HttpException";
-import { HttpStatus } from "@/utils/HttpException/HttpStatus";
+import RequestTyped from "@/interfaces/queries/RequestTyped";
+import ProductService from "./product.service";
 
 const router = Router();
 
+const productModelInstance = new ProductService(ProductModel)
+
 router.get("/:id", async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const product = await ProductService.getOne(req.params.id);
+    const product = await productModelInstance.getOne(req.params.id);
 
-    if(!product) throw new HttpException(HttpMessages.NOT_FOUND, HttpStatus.NOT_FOUND);
+    if(!product) new HttpException(HttpMessages.NOT_FOUND, HttpStatus.NOT_FOUND);
 
-    res.status(200).json({
+    res.status(HttpStatus.OK).json({
       success: true,
       data: product
     });
@@ -24,15 +26,18 @@ router.get("/:id", async (req: Request, res: Response, next: NextFunction) => {
   }
 });
 
-router.post("/add", async (req: TypedRequestBody<AddProductDto>, res: Response, next) => {
+router.post("/add", async (req: RequestTyped<AddProductDto>, res: Response, next) => {
   try {
-    const product = await ProductService.addProduct(req.body);
-    // if(!product) throw new HttpException()
+    const product = await productModelInstance.addProduct(req.body);
+
+    if(!product) new HttpException("bad error", HttpStatus.BAD_REQUEST);
+
+    res.status(HttpStatus.CREATED).json({
+      success: true,
+      data: product
+    });
   } catch (e) {
-    res.status(500).json({
-      success: false,
-      message: e
-    })
+    next(e);
   }
 });
 
