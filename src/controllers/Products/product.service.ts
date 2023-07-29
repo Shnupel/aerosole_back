@@ -8,7 +8,11 @@ export default class ProductService {
     this.ProductModel = ProductModel;
   }
 
-   async getOne(id: string): Promise<Document<IProduct> | null> {
+  async getMany({ limit, howSkip }: { limit: number, howSkip: number }): Promise<Document<IProduct>[]>{
+    return await this.ProductModel.find().skip(howSkip).limit(limit).exec();
+  }
+
+  async getOne(id: string): Promise<Document<IProduct> | null> {
     return await this.ProductModel.findById(id).exec();
   }
 
@@ -16,5 +20,9 @@ export default class ProductService {
     const newProduct = new this.ProductModel(dto);
     await newProduct.save();
     return newProduct;
+  }
+
+  async deleteProduct(id: string): Promise<any> {
+    return this.ProductModel.findByIdAndDelete(id).exec();
   }
 }

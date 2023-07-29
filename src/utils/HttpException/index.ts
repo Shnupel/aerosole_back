@@ -1,10 +1,12 @@
 import { HttpStatus } from "./HttpStatus";
 
+export { HttpStatus } from "./HttpStatus";
+
 export default class HttpException extends Error {
-  private readonly code: HttpStatus;
+  private readonly code: number;
   constructor(
     message: string,
-    httpCode: HttpStatus
+    httpCode: number
   ) {
     super(message);
     this.message = message;
@@ -19,5 +21,3 @@ export default class HttpException extends Error {
     return this.message;
   }
 }
-
-export { HttpStatus } from "./HttpStatus";

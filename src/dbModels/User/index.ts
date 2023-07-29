@@ -4,6 +4,7 @@ export interface IUser extends mongoose.Document {
   name: string,
   login: string,
   passwordHash: string,
+  email?: string
   products: Types.ObjectId[]
 }
 
@@ -26,6 +27,10 @@ const userSchema = new Schema<IUser, Model<IUser>>({
     default: [],
     ref: "Products",
     required: true
+  },
+  email: {
+    type: String,
+    required: false
   }
 },{
   timestamps: true
