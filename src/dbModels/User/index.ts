@@ -6,6 +6,7 @@ export interface IUser extends mongoose.Document {
   passwordHash: string,
   email?: string
   products: Types.ObjectId[]
+  role: String
 }
 
 const userSchema = new Schema<IUser, Model<IUser>>({
@@ -30,7 +31,13 @@ const userSchema = new Schema<IUser, Model<IUser>>({
   },
   email: {
     type: String,
-    required: false
+    required: false,
+    unique: true
+  },
+  role: {
+    type: String,
+    required: false,
+    default: "user"
   }
 },{
   timestamps: true

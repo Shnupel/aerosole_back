@@ -22,6 +22,14 @@ export default class ProductService {
     return newProduct;
   }
 
+  async updateProduct(id: number, fields: { [key: string]: string }): Promise<Document<IProduct> | null> {
+    return this.ProductModel.findOneAndUpdate(
+      { _id: id },
+      { ...fields },
+      { new: true }
+    );
+  }
+
   async deleteProduct(id: string): Promise<any> {
     return this.ProductModel.findByIdAndDelete(id).exec();
   }

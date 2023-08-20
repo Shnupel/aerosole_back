@@ -2,7 +2,6 @@ import HttpException  from "@/utils/HttpException";
 import { NextFunction, Response, Request } from "express";
 
 function HandleError(err: Error, req: Request, res: Response, next: NextFunction){
-  console.log("sdf")
   if(err instanceof HttpException){
     return res.status(err.getCode()).json({
       success: false,

@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response, Router } from "express";
-import { HttpMessages } from "@/constants";
+import { HttpMessages } from "@/constants/messages";
 import HttpException, { HttpStatus } from "@/utils/HttpException";
 import ProductModel from "@/dbModels/Product";
 import { AddProductDto } from "@/controllers/Products/dto/addProduct.dto";
@@ -8,14 +8,14 @@ import ProductService from "./product.service";
 
 const router = Router();
 
-const productModelInstance = new ProductService(ProductModel)
+const productService = new ProductService(ProductModel);
 
 router.get("/", async (req: RequestTyped<{ limit: number, paginate: number }>, res: Response, next: NextFunction) => {
   try {
     const { limit = 20, paginate = 1 } = req.body;
     const howSkip = (paginate - 1) * limit;
-    const products = await productModelInstance.getMany({ limit, howSkip });
-    res.status(200).json({
+    const products = await productService.getMany({ limit, howSkip });
+    res.status(HttpStatus.OK).json({
       success: true,
       data: products
     })
@@ -26,23 +26,22 @@ router.get("/", async (req: RequestTyped<{ limit: number, paginate: number }>, r
 
 router.get("/:id", async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const product = await productModelInstance.getOne(req.params.id);
+    const product = await productService.getOne(req.params.id);
     console.log(product);
     if(!product) new HttpException(HttpMessages.NOT_FOUND, HttpStatus.NOT_FOUND);
 
     res.status(HttpStatus.OK).json({
       success: true,
       data: product
-    });
-
+    })
   } catch (e) {
     next(e);
   }
 });
 
-router.post("/add", async (req: RequestTyped<AddProductDto>, res: Response, next: NextFunction) => {
+router.post("/create", async (req: RequestTyped<AddProductDto>, res: Response, next: NextFunction) => {
   try {
-    const product = await productModelInstance.addProduct(req.body);
+    const product = await productService.addProduct(req.body);
 
     if(!product) new HttpException(HttpMessages.CAN_NOT_CREATE, HttpStatus.INTERNAL_SERVER_ERROR);
 
@@ -55,11 +54,21 @@ router.post("/add", async (req: RequestTyped<AddProductDto>, res: Response, next
   }
 });
 
-
-
-router.delete("/:id", async (req, res, next) => {
+router.patch("/:id", async (req: RequestTyped, res: Response, next: NextFunction) => {
   try {
-    const deletedProduct = await productModelInstance.deleteProduct(req.params.id);
+    const updatedProduct = await productService.updateProduct(req.params.id, req.body);
+    res.status(202).json({
+      success: true,
+      data: updatedProduct
+    });
+  } catch (e) {
+    next(e);
+  }
+})
+
+router.delete("/:id", async (req: RequestTyped, res: Response, next) => {
+  try {
+    const deletedProduct = await productService.deleteProduct(req.params.id);
     res.status(200).json({
       success: true,
       data: deletedProduct
