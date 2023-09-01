@@ -19,7 +19,7 @@ const LoginUser = [
 
 const AddProduct = [
   header("authorization", ValidationErrors.NO_TOKEN()).isString(),
-  body("productId", ValidationErrors.NO_FIELD("productId")).isString()
+  body("productId", ValidationErrors.NO_FIELD("productId")).isArray()
 ]
 
 const UpdateUserData = [

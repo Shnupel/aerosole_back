@@ -15,6 +15,7 @@ import UserService from "./user.service";
 import { CreateUserDto } from "@/controllers/Users/dto/createUser.dto";
 import jwt from "jsonwebtoken";
 import ValidateToken from "@/middlewares/ValidateToken.middleware";
+import validateToken from "@/middlewares/ValidateToken.middleware";
 
 const router = Router();
 
@@ -73,22 +74,32 @@ router.post("/create",
   validator,
   async (req: RequestTyped<CreateUserDto>, res: Response, next: NextFunction) => {
   try {
-    const newUser = await userService.createUser(req.body);
+    const user = await userService.createUser(req.body);
+
+    const token = jwt.sign(
+      { id: user._id, role: user?.role || "user" },
+      process.env.SECRET_KEY,
+      { expiresIn: "30m" }
+    )
+
     res.status(HttpStatus.CREATED).json({
       success: true,
-      data: newUser
+      data: user,
+      token
     });
   } catch (e) {
     next(e);
   }
 });
 
-router.post("/addProduct/:id",
+router.post("/addProduct/",
   UsersValidation.AddProduct,
   validator,
-  async (req: RequestTyped<{ productId: string }>, res: Response, next: NextFunction) => {
+  validateToken,
+  async (req: RequestTyped<{ productId: string[] }>, res: Response, next: NextFunction) => {
   try {
-    const updatedUser = await userService.addProduct(req.body.productId, req.params.id);
+    const { id } = req["token"];
+    const updatedUser = await userService.addProduct(req.body.productId, id);
     res.status(HttpStatus.ACCEPTED).json({
       success: true,
       data: updatedUser
@@ -98,27 +109,33 @@ router.post("/addProduct/:id",
   }
 });
 
-router.patch("/:id",
+router.patch("/",
   UsersValidation.UpdateUserData,
   validator,
+  validateToken,
   async (req: RequestTyped<{ email: string, number: number }>, res: Response, next: NextFunction) => {
   try {
-    const updatedUser = await userService.updateUser(req.body, req.params.id);
+    const { id } = req["token"];
+    const updatedUser = await userService.updateUser(req.body, id);
+
     res.status(HttpStatus.ACCEPTED).json({
       success: true,
-      data: updatedUser
+      data: updatedUser,
     })
   } catch (e) {
     next(e);
   }
 });
 
-router.delete("/:id",
+router.delete("/",
   UsersValidation.DeleteUser,
   validator,
+  validateToken,
   async (req: RequestTyped, res: Response, next: NextFunction) =>  {
   try {
-    const deletedProduct = await userService.deleteProduct(req.params.id);
+    const { id } = req["token"];
+    const deletedProduct = await userService.deleteProduct(id, req.body.productId);
+
     res.status(HttpStatus.OK).json({
       success: true,
       data: deletedProduct
